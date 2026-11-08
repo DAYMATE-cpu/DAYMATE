@@ -1,0 +1,254 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#101014">
+<title>DAYMATE</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;background:#101014;color:#f5f3fa;
+ font-family:Arial,sans-serif;min-height:100vh;
+}
+header{
+ padding:22px 20px;display:flex;justify-content:space-between;
+ align-items:center;border-bottom:1px solid #292832;
+}
+.logo{font-size:25px;font-weight:900;letter-spacing:3px}
+.logo span{color:#a78bfa}
+.status{font-size:11px;color:#9e94b5}
+main{max-width:650px;margin:auto;padding:22px 18px 100px}
+h1{font-size:28px;margin-bottom:8px}
+.muted{color:#9993a8;font-size:14px;line-height:1.5}
+.card{
+ background:#1b1a22;border:1px solid #302d3a;
+ border-radius:17px;padding:18px;margin-top:18px;
+}
+.companion{
+ display:flex;align-items:center;gap:15px;
+}
+.avatar{
+ width:57px;height:57px;border-radius:18px;
+ background:linear-gradient(135deg,#a78bfa,#5b43b5);
+ display:grid;place-items:center;font-size:27px;
+}
+.name{font-size:18px;font-weight:bold}
+.online{color:#a78bfa;font-size:12px;margin-top:5px}
+button{
+ border:0;border-radius:11px;padding:12px 15px;
+ background:#8b6be8;color:white;font-weight:bold;
+ cursor:pointer;
+}
+button:active{transform:scale(.97)}
+.secondary{background:#302b3b;color:#e7defb}
+input,select{
+ width:100%;background:#111016;color:white;
+ border:1px solid #393443;border-radius:11px;
+ padding:14px;font-size:15px;outline:none;
+}
+.chat{
+ height:260px;overflow-y:auto;display:flex;
+ flex-direction:column;gap:12px;padding:10px 0;
+}
+.message{
+ max-width:85%;padding:12px 14px;border-radius:15px;
+ font-size:14px;line-height:1.5;
+}
+.bot{background:#302b3b;align-self:flex-start}
+.user{background:#7456c9;align-self:flex-end}
+.chatrow{display:flex;gap:8px;margin-top:10px}
+.chatrow input{min-width:0;flex:1}
+.task{
+ display:flex;justify-content:space-between;align-items:center;
+ padding:12px 0;border-bottom:1px solid #302d3a;
+ gap:10px;font-size:14px;
+}
+.task:last-child{border:0}
+.task.done span{text-decoration:line-through;color:#777}
+.task button{padding:7px 10px;font-size:12px}
+.taskform{display:flex;gap:8px;margin-top:14px}
+.taskform input{min-width:0;flex:1}
+.section-title{font-weight:bold;font-size:17px}
+footer{
+ position:fixed;bottom:0;left:0;right:0;
+ background:#17161d;border-top:1px solid #302d3a;
+ display:flex;justify-content:space-around;
+ padding:15px 5px;color:#aaa;font-size:12px;
+}
+footer a{color:#c7b8ef;text-decoration:none}
+.small{font-size:12px;color:#918a9e}
+</style>
+</head>
+
+<body>
+<header>
+ <div class="logo">DAY<span>MATE</span></div>
+ <div class="status">● YOUR COMPANION</div>
+</header>
+
+<main>
+ <h1>Hey, there. 👋</h1>
+ <p class="muted">Your day, your goals, your companion.</p>
+
+ <section class="card companion">
+  <div class="avatar">✦</div>
+  <div>
+   <div class="name">DAYMATE</div>
+   <div class="online">Ready to cause some trouble. 😏</div>
+  </div>
+ </section>
+
+ <section class="card" id="chat-section">
+  <div class="section-title">Your conversation</div>
+  <div class="chat" id="chat">
+   <div class="message bot">
+    Well, look who finally showed up. 😂
+    I'm DAYMATE. What's happening today?
+   </div>
+  </div>
+  <div class="chatrow">
+   <input id="chatInput" placeholder="Talk to your DAYMATE...">
+   <button onclick="sendMessage()">Send</button>
+  </div>
+  <p class="small">Prototype conversation · AI connection coming later</p>
+ </section>
+
+ <section class="card">
+  <div class="section-title">Your personality</div>
+  <p class="muted">Choose the companion style you'd like to meet.</p>
+  <select id="personality" onchange="changePersonality()">
+   <option value="playful">Playful — funny and cheeky</option>
+   <option value="gentle">Gentle — calm and supportive</option>
+   <option value="strict">Strict — direct and disciplined</option>
+   <option value="chaos">Chaos — unpredictable and energetic</option>
+  </select>
+  <p id="personalityStatus" class="small">Current style: Playful</p>
+ </section>
+
+ <section class="card">
+  <div class="section-title">Today's missions 🎯</div>
+  <p class="muted">Small steps. Real progress.</p>
+  <div id="tasks"></div>
+  <div class="taskform">
+   <input id="taskInput" placeholder="Add a task...">
+   <button onclick="addTask()">Add</button>
+  </div>
+ </section>
+
+ <section class="card">
+  <div class="section-title">A little about you</div>
+  <p class="muted">Save a note to demonstrate DAYMATE's local memory.</p>
+  <input id="memoryInput" placeholder="Something to remember...">
+  <button style="margin-top:10px" onclick="saveMemory()">Save memory</button>
+  <p id="memoryStatus" class="small">No memory saved yet.</p>
+ </section>
+</main>
+
+<footer>
+ <a href="#">Home</a>
+ <a href="#chat-section">Chat</a>
+ <a href="#tasks">Tasks</a>
+ <a href="#personality">Personality</a>
+</footer>
+
+<script>
+const chat = document.getElementById("chat");
+const input = document.getElementById("chatInput");
+
+function addMessage(text, type){
+ const msg = document.createElement("div");
+ msg.className = "message " + type;
+ msg.textContent = text;
+ chat.appendChild(msg);
+ chat.scrollTop = chat.scrollHeight;
+}
+
+function sendMessage(){
+ const text = input.value.trim();
+ if(!text) return;
+
+ addMessage(text,"user");
+ input.value = "";
+
+ const style = document.getElementById("personality").value;
+ let response = "Interesting. Tell me more. I'm listening. 👀";
+
+ if(style==="playful")
+  response="Okay, I'm listening. 😂 What's the plan?";
+ if(style==="gentle")
+  response="I'm here. Take your time. ❤️";
+ if(style==="strict")
+  response="Noted. Now what's the next action? Let's be productive.";
+ if(style==="chaos")
+  response="WAIT WHAT?! 😭 Okay, you've got my attention!";
+
+ setTimeout(()=>addMessage(response,"bot"),500);
+}
+
+input.addEventListener("keydown",e=>{
+ if(e.key==="Enter") sendMessage();
+});
+
+function changePersonality(){
+ const style=document.getElementById("personality");
+ document.getElementById("personalityStatus").textContent=
+ "Current style: "+style.options[style.selectedIndex].text.split(" — ")[0];
+}
+
+let tasks=JSON.parse(localStorage.getItem("daymateTasks")||"[]");
+
+function renderTasks(){
+ const area=document.getElementById("tasks");
+ area.innerHTML="";
+ tasks.forEach((task,index)=>{
+  const row=document.createElement("div");
+  row.className="task"+(task.done?" done":"");
+  const label=document.createElement("span");
+  label.textContent=task.text;
+  const btn=document.createElement("button");
+  btn.className="secondary";
+  btn.textContent=task.done?"Undo":"Done";
+  btn.onclick=()=>toggleTask(index);
+  row.append(label,btn);
+  area.appendChild(row);
+ });
+ localStorage.setItem("daymateTasks",JSON.stringify(tasks));
+}
+
+function addTask(){
+ const field=document.getElementById("taskInput");
+ const text=field.value.trim();
+ if(!text)return;
+ tasks.push({text:text,done:false});
+ field.value="";
+ renderTasks();
+}
+
+function toggleTask(index){
+ tasks[index].done=!tasks[index].done;
+ renderTasks();
+}
+
+function saveMemory(){
+ const field=document.getElementById("memoryInput");
+ const value=field.value.trim();
+ if(!value)return;
+ localStorage.setItem("daymateMemory",value);
+ document.getElementById("memoryStatus").textContent=
+ "Saved locally: "+value;
+ field.value="";
+}
+
+const savedMemory=localStorage.getItem("daymateMemory");
+if(savedMemory){
+ document.getElementById("memoryStatus").textContent=
+ "Saved locally: "+savedMemory;
+}
+
+renderTasks();
+</script>
+</body>
+</html>
